@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Checkout</title>
+  <script src="https://sandbox.web.squarecdn.com/v1/square.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f6f6f7;
+      color: #333;
+    }
+
+    .checkout-wrapper {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 30px;
+    }
+
+    @media (max-width: 700px) {
+      .checkout-wrapper { grid-template-columns: 1fr; margin: 0; }
+    }
+
+    .section {
+      background: #fff;
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 16px;
+      border: 1px solid #e1e1e1;
+    }
+
+    .section h2 {
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #666;
+      margin-bottom: 16px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      color: #555;
+      margin-bottom: 5px;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    .form-group input:focus, .form-group select:focus {
+      border-color: #5c6ac4;
+    }
+
+    /* Square card field */
+    #card-container {
+      min-height: 90px;
+    }
+
+    #card-container iframe {
+      border-radius: 6px;
+    }
+
+    .pay-btn {
+      width: 100%;
+      padding: 14px;
+      background: #5c6ac4;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 16px;
+      transition: background 0.2s;
+    }
+
+    .pay-btn:hover { background: #4959bd; }
+    .pay-btn:disabled { background: #aaa; cursor: not-allowed; }
+
+    /* Order summary */
+    .order-summary { position: sticky; top: 20px; }
+
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 14px;
+    }
+
+    .order-item:last-child { border-bottom: none; }
+
+    .order-item-name { flex: 1; }
+    .order-item-price { font-weight: 600; }
+
+    .order-total {
+      display: flex;
+      justify-content: space-between;
+      font-size: 16px;
+      font-weight: 700;
+      padding-top: 14px;
+      margin-top: 8px;
+      border-top: 2px solid #333;
+    }
+
+    .message {
+      padding: 12px;
+      border-radius: 6px;
+      margin-top: 12px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .message.error { background: #fff0f0; color: #d00; border: 1px solid #fcc; }
+    .message.success { background: #f0fff4; color: #0a0; border: 1px solid #9f9; }
+
+    .secure-badge {
+      text-align: center;
+      font-size: 12px;
+      color: #999;
+      margin-top: 12px;
+    }
+
+    .store-header {
+      text-align: center;
+      padding: 24px 20px 0;
+      font-size: 22px;
+      font-weight: 700;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+
+<div class="store-header" id="store-name">My Store — Checkout</div>
+
+<div class="checkout-wrapper">
+  <!-- LEFT: Form -->
+  <div class="left-col">
+
+    <!-- Contact -->
+    <div class="section">
+      <h2>Contact Information</h2>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="email" placeholder="you@example.com" required />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>First Name</label>
+          <input type="text" id="firstName" placeholder="Jean" required />
+        </div>
+        <div class="form-group">
+          <label>Last Name</label>
+          <input type="text" id="lastName" placeholder="Dupont" required />
+        </div>
+      </div>
+    </div>
+
+    <!-- Shipping -->
+    <div class="section">
+      <h2>Shipping Address</h2>
+      <div class="form-group">
+        <label>Address</label>
+        <input type="text" id="address" placeholder="12 Rue de la Paix" required />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>City</label>
+          <input type="text" id="city" placeholder="Paris" required />
+        </div>
+        <div class="form-group">
+          <label>Postal Code</label>
+          <input type="text" id="zip" placeholder="75001" required />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Country</label>
+        <select id="country">
+          <option value="FR">France</option>
+          <option value="BE">Belgium</option>
+          <option value="CH">Switzerland</option>
+          <option value="GB">United Kingdom</option>
+          <option value="DE">Germany</option>
+          <option value="ES">Spain</option>
+          <option value="IT">Italy</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Payment -->
+    <div class="section">
+      <h2>Payment — Secured by Square</h2>
+      <div id="card-container"></div>
+      <div id="message" class="message"></div>
+      <button class="pay-btn" id="pay-btn">Pay Now</button>
+      <div class="secure-badge">🔒 Payments secured by Square</div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT: Order Summary -->
+  <div class="order-summary">
+    <div class="section">
+      <h2>Order Summary</h2>
+      <div id="order-items">
+        <!-- Items loaded from URL params -->
+      </div>
+      <div class="order-total">
+        <span>Total</span>
+        <span id="order-total">€0.00</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ─── Read order from URL params (passed by Shopify) ───
+  const params = new URLSearchParams(window.location.search);
+  const storeName = params.get('store') || 'My Store';
+  const totalAmount = parseFloat(params.get('total') || '0');
+  const currency = params.get('currency') || 'EUR';
+  const lineItemsRaw = params.get('items');
+
+  document.getElementById('store-name').textContent = storeName + ' — Checkout';
+  document.getElementById('order-total').textContent = 
+    `${currency === 'EUR' ? '€' : currency}${totalAmount.toFixed(2)}`;
+  document.title = storeName + ' — Checkout';
+
+  // Show line items
+  const itemsContainer = document.getElementById('order-items');
+  if (lineItemsRaw) {
+    try {
+      const items = JSON.parse(decodeURIComponent(lineItemsRaw));
+      items.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'order-item';
+        div.innerHTML = `
+          <span class="order-item-name">${item.title} × ${item.quantity}</span>
+          <span class="order-item-price">€${(item.price * item.quantity).toFixed(2)}</span>
+        `;
+        itemsContainer.appendChild(div);
+      });
+    } catch(e) {
+      itemsContainer.innerHTML = '<p style="color:#999;font-size:13px">Loading order details...</p>';
+    }
+  }
+
+  // ─── Initialize Square ───
+  const APP_ID = 'REPLACE_WITH_YOUR_SQUARE_APP_ID';
+  const LOCATION_ID = 'REPLACE_WITH_YOUR_SQUARE_LOCATION_ID';
+
+  async function initSquare() {
+    const payments = Square.payments(APP_ID, LOCATION_ID);
+    const card = await payments.card();
+    await card.attach('#card-container');
+
+    document.getElementById('pay-btn').addEventListener('click', async () => {
+      const btn = document.getElementById('pay-btn');
+      const msg = document.getElementById('message');
+      
+      // Validate fields
+      const email = document.getElementById('email').value.trim();
+      const firstName = document.getElementById('firstName').value.trim();
+      const lastName = document.getElementById('lastName').value.trim();
+      const address = document.getElementById('address').value.trim();
+      const city = document.getElementById('city').value.trim();
+      const zip = document.getElementById('zip').value.trim();
+      const country = document.getElementById('country').value;
+
+      if (!email || !firstName || !lastName || !address || !city || !zip) {
+        msg.textContent = 'Please fill in all fields.';
+        msg.className = 'message error';
+        msg.style.display = 'block';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Processing...';
+      msg.style.display = 'none';
+
+      try {
+        const result = await card.tokenize();
+        
+        if (result.status === 'OK') {
+          // Send to our server
+          const response = await fetch('/api/payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sourceId: result.token,
+              amount: totalAmount,
+              currency: currency,
+              orderDetails: {
+                email, firstName, lastName,
+                address, city, zip, country,
+                amount: totalAmount,
+                lineItems: lineItemsRaw ? JSON.parse(decodeURIComponent(lineItemsRaw)) : [],
+              }
+            })
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            msg.textContent = '✅ Payment successful! Thank you for your order.';
+            msg.className = 'message success';
+            msg.style.display = 'block';
+            btn.textContent = 'Order Confirmed ✅';
+            // Optionally redirect to thank you page
+            // window.location.href = '/thank-you';
+          } else {
+            throw new Error(data.message);
+          }
+        } else {
+          throw new Error(result.errors?.[0]?.message || 'Card error');
+        }
+      } catch (err) {
+        msg.textContent = '❌ ' + err.message;
+        msg.className = 'message error';
+        msg.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Pay Now';
+      }
+    });
+  }
+
+  initSquare();
+</script>
+</body>
+</html>
